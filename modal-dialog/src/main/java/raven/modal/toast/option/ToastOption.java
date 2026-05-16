@@ -55,11 +55,19 @@ public class ToastOption {
         return duration;
     }
 
+    public int getOpenDuration() {
+        return openDuration;
+    }
+
+    public int getCloseDuration() {
+        return closeDuration;
+    }
+
     public int getDelay() {
         return delay;
     }
 
-    private ToastOption(ToastEvent event, ToastLayoutOption layoutOption, ToastStyle style, ToastInterpolator interpolator, boolean animationEnabled, boolean heavyWeight, boolean pauseDelayOnHover, boolean autoClose, boolean closeOnClick, boolean htmlEnabled, int duration, int delay) {
+    private ToastOption(ToastEvent event, ToastLayoutOption layoutOption, ToastStyle style, ToastInterpolator interpolator, boolean animationEnabled, boolean heavyWeight, boolean pauseDelayOnHover, boolean autoClose, boolean closeOnClick, boolean htmlEnabled, int duration, int openDuration, int closeDuration, int delay) {
         this.event = event;
         this.layoutOption = layoutOption;
         this.style = style;
@@ -71,6 +79,8 @@ public class ToastOption {
         this.closeOnClick = closeOnClick;
         this.htmlEnabled = htmlEnabled;
         this.duration = duration;
+        this.openDuration = openDuration;
+        this.closeDuration = closeDuration;
         this.delay = delay;
     }
 
@@ -88,6 +98,8 @@ public class ToastOption {
     private boolean closeOnClick;
     private boolean htmlEnabled;
     private int duration = 350;
+    private int openDuration = -1;
+    private int closeDuration = -1;
     private int delay = 3000;
 
     public ToastOption setEvent(ToastEvent event) {
@@ -145,12 +157,22 @@ public class ToastOption {
         return this;
     }
 
+    public ToastOption setOpenDuration(int openDuration) {
+        this.openDuration = openDuration;
+        return this;
+    }
+
+    public ToastOption setCloseDuration(int closeDuration) {
+        this.closeDuration = closeDuration;
+        return this;
+    }
+
     public ToastOption setDelay(int delay) {
         this.delay = delay;
         return this;
     }
 
     public ToastOption copy() {
-        return new ToastOption(event.copy(), layoutOption.copy(), style.copy(), interpolator, animationEnabled, heavyWeight, pauseDelayOnHover, autoClose, closeOnClick, htmlEnabled, duration, delay);
+        return new ToastOption(event.copy(), layoutOption.copy(), style.copy(), interpolator, animationEnabled, heavyWeight, pauseDelayOnHover, autoClose, closeOnClick, htmlEnabled, duration, openDuration, closeDuration, delay);
     }
 }

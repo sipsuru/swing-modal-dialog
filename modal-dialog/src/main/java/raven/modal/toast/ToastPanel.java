@@ -93,7 +93,7 @@ public class ToastPanel extends JPanel {
         if (!toastData.getOption().isHeavyWeight()) {
             setOpaque(false);
         }
-        if (isAnimationSupport()) {
+        if (getAnimationDuration(true) > 0) {
             animate = 0f;
         }
 
@@ -464,8 +464,14 @@ public class ToastPanel extends JPanel {
         return buttonClose;
     }
 
-    private boolean isAnimationSupport() {
-        return getOption().isAnimationEnabled() && !getOption().isHeavyWeight();
+    private int getAnimationDuration(boolean open) {
+        ToastOption option = getOption();
+        if (!option.isAnimationEnabled() || option.isHeavyWeight()) {
+            return 0;
+        }
+        int duration = option.getDuration();
+        int d = open ? option.getOpenDuration() : option.getCloseDuration();
+        return d >= 0 ? d : duration;
     }
 
     public void start() {
@@ -473,32 +479,9 @@ public class ToastPanel extends JPanel {
             return;
         }
         installMouseHover();
-        if (isAnimationSupport()) {
-            if (animator == null) {
-                animator = new Animator(toastData.getOption().getDuration(), new Animator.TimingTarget() {
-                    @Override
-                    public void timingEvent(float v) {
-                        animate = showing ? v : 1f - v;
-                        baseToastContainer.updateLayout(owner);
-                    }
-
-                    @Override
-                    public void begin() {
-                        createSnapshot();
-                    }
-
-                    @Override
-                    public void end() {
-                        repaint();
-                        removeSnapshot();
-                        if (showing) {
-                            defaultStop();
-                        } else {
-                            removeToast();
-                        }
-                    }
-                });
-            }
+        int duration = getAnimationDuration(true);
+        if (duration > 0) {
+            checkAnimatorOrCreate(duration);
             showing = true;
             animate = 0f;
             animator.start();
@@ -544,11 +527,14 @@ public class ToastPanel extends JPanel {
         if (isCurrenPromise() && !toastPromise.rejectAble()) {
             return;
         }
-        if (isAnimationSupport()) {
-            if (animator.isRunning()) {
+        int duration = getAnimationDuration(false);
+        if (duration > 0) {
+            if (animator != null && animator.isRunning()) {
                 animator.stop();
             }
+            checkAnimatorOrCreate(duration);
             showing = false;
+            animator.setDuration(duration);
             animator.start();
             id = null;
         } else {
@@ -564,12 +550,11 @@ public class ToastPanel extends JPanel {
         if (threadDelay != null && threadDelay.isAlive()) {
             threadDelay.interrupt();
         }
-        if (isAnimationSupport()) {
+        if (getAnimationDuration(false) > 0) {
             if (animator != null && animator.isRunning()) {
                 animator.stop();
-            } else {
-                removeToast();
             }
+            removeToast();
         } else {
             removeToast();
         }
@@ -668,6 +653,34 @@ public class ToastPanel extends JPanel {
 
     public boolean checkSameLayout(ToastLocation location) {
         return toastData.getOption().getLayoutOption().getLocation().isSame(location);
+    }
+
+    private void checkAnimatorOrCreate(int duration) {
+        if (animator == null) {
+            animator = new Animator(duration, new Animator.TimingTarget() {
+                @Override
+                public void timingEvent(float v) {
+                    animate = showing ? v : 1f - v;
+                    baseToastContainer.updateLayout(owner);
+                }
+
+                @Override
+                public void begin() {
+                    createSnapshot();
+                }
+
+                @Override
+                public void end() {
+                    repaint();
+                    removeSnapshot();
+                    if (showing) {
+                        defaultStop();
+                    } else {
+                        removeToast();
+                    }
+                }
+            });
+        }
     }
 
     public static class ToastData {

@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.2-SNAPSHOT]
+
+### New features and improvements
+
+- Toast:
+    - Add new option `openDuration` and `closeDuration` to control toast open and close animation duration (issue #57)
+
 ## [2.6.1] - 2026-03-17
 
 ### New features and improvements
